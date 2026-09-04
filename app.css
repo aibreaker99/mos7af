@@ -1,0 +1,256 @@
+/* ================================================
+   مصحف — ملف التنسيق
+   الألوان معرّفة كمتغيّرات ليسهل تغيير المظهر
+   ================================================ */
+
+@font-face {
+  font-family: 'AmiriQuran';
+  src: url('fonts/AmiriQuran-Regular.woff') format('woff'),
+       url('fonts/AmiriQuran-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  --bg: #f7f3e8;
+  --paper: #fffdf6;
+  --ink: #1d1b16;
+  --muted: #8a8272;
+  --line: #e6dfcc;
+  --accent: #1f6f5c;
+  --accent-soft: #e8f1ee;
+  --bar: #fffdf6;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.05);
+  --fs: 30px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+html[data-theme="light"] {
+  --bg: #f2f4f6; --paper: #ffffff; --ink: #16181d; --muted: #838a96;
+  --line: #e5e8ec; --accent: #1f6f5c; --accent-soft: #e8f1ee; --bar: #ffffff;
+}
+
+html[data-theme="dark"] {
+  --bg: #101215; --paper: #171a1f; --ink: #e8e6df; --muted: #7f858f;
+  --line: #262a31; --accent: #4fbfa0; --accent-soft: #17332c; --bar: #171a1f;
+  --shadow: none;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input { font-family: inherit; color: inherit; }
+
+/* ---------- الشاشات ---------- */
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; }
+.screen.sheet {
+  background: var(--bg);
+  transform: translateY(100%);
+  transition: transform .26s cubic-bezier(.2,.8,.2,1);
+  z-index: 20;
+  visibility: hidden;
+}
+.screen.sheet.open { transform: translateY(0); visibility: visible; }
+.hidden { display: none !important; }
+
+/* ---------- الشريط العلوي والسفلي ---------- */
+.topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(8px + var(--safe-t)) 10px 8px;
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+  transition: opacity .2s, transform .25s;
+}
+.topbar-title {
+  flex: 1; text-align: center; font-size: 15px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-title .sep { color: var(--muted); margin: 0 4px; font-weight: 400; }
+.topbar-actions { display: flex; gap: 2px; }
+
+.icon-btn {
+  width: 40px; height: 40px; flex: 0 0 40px;
+  display: grid; place-items: center;
+  background: none; border: 0; border-radius: 12px;
+  cursor: pointer; padding: 0;
+}
+.icon-btn:active { background: var(--accent-soft); }
+.icon-btn.ghost { pointer-events: none; }
+.icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+.bottombar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 8px 14px calc(8px + var(--safe-b));
+  background: var(--bar);
+  border-top: 1px solid var(--line);
+  flex: 0 0 auto;
+  transition: opacity .2s, transform .25s;
+}
+.nav-btn {
+  width: 44px; height: 44px; border: 0; background: none; border-radius: 14px;
+  display: grid; place-items: center; cursor: pointer; color: var(--muted);
+}
+.nav-btn:active { background: var(--accent-soft); color: var(--accent); }
+.nav-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.page-chip {
+  border: 1px solid var(--line); background: none; border-radius: 999px;
+  padding: 7px 18px; font-size: 13.5px; color: var(--muted); cursor: pointer;
+}
+.page-chip:active { background: var(--accent-soft); }
+
+/* وضع القراءة الغامرة: إخفاء الأشرطة */
+body.immersive .topbar { transform: translateY(-100%); opacity: 0; }
+body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
+
+/* ---------- صفحة المصحف ---------- */
+#page-wrap {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 10px 22px;
+}
+.page {
+  max-width: 720px; margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 22px 18px 26px;
+  min-height: 100%;
+}
+.ayat {
+  font-family: 'AmiriQuran', serif;
+  font-size: var(--fs);
+  line-height: 2.05;
+  text-align: justify;
+  text-align-last: center;
+  word-spacing: .04em;
+  margin: 0;
+}
+.ayah { cursor: pointer; border-radius: 6px; }
+.ayah.hl { background: var(--accent-soft); box-shadow: 0 0 0 4px var(--accent-soft); }
+.ayah-num { color: var(--accent); font-size: .92em; }
+
+/* عنوان السورة */
+.surah-head {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 18px 0 10px; padding: 10px 14px;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--accent-soft);
+}
+.surah-head:first-child { margin-top: 0; }
+.surah-head .nm { font-family: 'AmiriQuran', serif; font-size: calc(var(--fs) * .8); color: var(--accent); }
+.surah-head .meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.basmala {
+  font-family: 'AmiriQuran', serif;
+  font-size: calc(var(--fs) * .86);
+  text-align: center; margin: 4px 0 12px; color: var(--ink);
+}
+.page-footer {
+  margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; font-size: 12px; color: var(--muted);
+}
+
+/* ---------- القوائم ---------- */
+.tabs { display: flex; gap: 6px; padding: 10px 12px; background: var(--bar); border-bottom: 1px solid var(--line); }
+.tab {
+  flex: 1; padding: 9px; border: 0; border-radius: 12px; cursor: pointer;
+  background: none; color: var(--muted); font-size: 14px; font-weight: 600;
+}
+.tab.active { background: var(--accent-soft); color: var(--accent); }
+
+.list-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(20px + var(--safe-b)); }
+.list { max-width: 720px; margin: 0 auto; padding: 8px 12px; }
+
+.row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; text-align: right;
+  padding: 12px 12px; margin-bottom: 6px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+  cursor: pointer;
+}
+.row:active { background: var(--accent-soft); }
+.row .num {
+  flex: 0 0 34px; height: 34px; display: grid; place-items: center;
+  border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+  font-size: 13px; font-weight: 700;
+}
+.row .body { flex: 1; min-width: 0; }
+.row .t1 { display: block; font-family: 'AmiriQuran', serif; font-size: 21px; line-height: 1.7; }
+.row .t2 { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.row .side { font-size: 12px; color: var(--muted); flex: 0 0 auto; }
+
+.res-ayah { display: block; font-family: 'AmiriQuran', serif; font-size: 22px; line-height: 2.1; }
+.res-ayah mark { background: none; color: var(--accent); font-weight: 700; }
+.empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; }
+
+/* ---------- البحث ---------- */
+#q {
+  flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--paper);
+  border-radius: 12px; padding: 10px 14px; font-size: 15px; outline: none;
+}
+#q:focus { border-color: var(--accent); }
+
+/* ---------- الإعدادات ---------- */
+.settings-body { padding: 14px 14px calc(30px + var(--safe-b)); max-width: 720px; margin: 0 auto; }
+.setting { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+.setting-label { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; }
+.muted { color: var(--muted); font-weight: 400; }
+.small { font-size: 12px; line-height: 1.8; }
+
+.segmented { display: flex; gap: 6px; background: var(--bg); border-radius: 12px; padding: 4px; }
+.segmented button {
+  flex: 1; padding: 9px; border: 0; background: none; border-radius: 9px;
+  font-size: 13.5px; color: var(--muted); cursor: pointer;
+}
+.segmented button.on { background: var(--paper); color: var(--accent); font-weight: 700; box-shadow: var(--shadow); }
+
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.preview { font-family: 'AmiriQuran', serif; font-size: var(--fs); text-align: center; margin-top: 14px; line-height: 2; }
+
+.switch { position: relative; display: inline-block; width: 48px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch span { position: absolute; inset: 0; background: var(--line); border-radius: 999px; transition: .2s; cursor: pointer; }
+.switch span::before { content: ''; position: absolute; width: 22px; height: 22px; top: 3px; right: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::before { transform: translateX(-20px); }
+
+.about { text-align: center; padding: 22px 10px; font-size: 13.5px; line-height: 1.9; }
+
+/* ---------- النافذة المنبثقة ---------- */
+.modal { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.4); padding: 20px; }
+.modal.open { display: flex; }
+.modal-card { background: var(--paper); border-radius: 18px; padding: 20px; width: 100%; max-width: 320px; box-shadow: var(--shadow); }
+.modal-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+#goto-input { width: 100%; padding: 12px; font-size: 17px; text-align: center; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); outline: none; }
+#goto-input:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.btn { flex: 1; padding: 11px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: var(--bg); color: var(--muted); }
+
+/* ---------- شاشة التحميل ---------- */
+#splash {
+  position: fixed; inset: 0; z-index: 90; background: var(--bg);
+  display: grid; place-content: center; justify-items: center; gap: 16px;
+  transition: opacity .3s;
+}
+#splash.gone { opacity: 0; pointer-events: none; }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+.splash-text { font-size: 13.5px; color: var(--muted); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (min-width: 700px) {
+  .page { padding: 34px 42px 38px; }
+}

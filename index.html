@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#f7f3e8">
+<meta name="description" content="مصحف إلكتروني بسيط وخفيف، يعمل بدون إنترنت، بدون إعلانات وبدون تتبّع.">
+<title>مصحف</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ===== شاشة القراءة ===== -->
+<div id="reader" class="screen active">
+  <header class="topbar" id="topbar">
+    <button class="icon-btn" id="btn-index" aria-label="الفهرس">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="topbar-title">
+      <span id="t-surah">الفاتحة</span>
+      <span class="sep">·</span>
+      <span id="t-juz">الجزء ١</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btn-search" aria-label="بحث">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-settings" aria-label="إعدادات">
+        <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="page-wrap">
+    <div id="page" class="page"></div>
+  </main>
+
+  <footer class="bottombar" id="bottombar">
+    <button class="nav-btn" id="btn-prev" aria-label="الصفحة السابقة">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <button class="page-chip" id="btn-goto">صفحة <span id="t-page">١</span></button>
+    <button class="nav-btn" id="btn-next" aria-label="الصفحة التالية">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+  </footer>
+</div>
+
+<!-- ===== شاشة الفهرس ===== -->
+<div id="index" class="screen sheet">
+  <header class="topbar">
+    <button class="icon-btn" data-close aria-label="رجوع">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <div class="topbar-title">الفهرس</div>
+    <div class="topbar-actions"><span class="icon-btn ghost"></span></div>
+  </header>
+  <div class="tabs">
+    <button class="tab active" data-tab="surahs">السور</button>
+    <button class="tab" data-tab="juz">الأجزاء</button>
+  </div>
+  <div class="list-wrap">
+    <div id="list-surahs" class="list"></div>
+    <div id="list-juz" class="list hidden"></div>
+  </div>
+</div>
+
+<!-- ===== شاشة البحث ===== -->
+<div id="search" class="screen sheet">
+  <header class="topbar">
+    <button class="icon-btn" data-close aria-label="رجوع">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <input id="q" type="search" placeholder="ابحث في القرآن…" autocomplete="off" enterkeyhint="search">
+  </header>
+  <div class="list-wrap">
+    <div id="results" class="list"></div>
+  </div>
+</div>
+
+<!-- ===== شاشة الإعدادات ===== -->
+<div id="settings" class="screen sheet">
+  <header class="topbar">
+    <button class="icon-btn" data-close aria-label="رجوع">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <div class="topbar-title">الإعدادات</div>
+    <div class="topbar-actions"><span class="icon-btn ghost"></span></div>
+  </header>
+  <div class="list-wrap settings-body">
+    <div class="setting">
+      <div class="setting-label">المظهر</div>
+      <div class="segmented" id="theme-seg">
+        <button data-theme="light">فاتح</button>
+        <button data-theme="sepia">ورقي</button>
+        <button data-theme="dark">ليلي</button>
+      </div>
+    </div>
+    <div class="setting">
+      <div class="setting-label">حجم الخط <span id="fs-val" class="muted"></span></div>
+      <input id="fs" type="range" min="18" max="46" step="1">
+      <div class="preview" id="fs-preview">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
+    </div>
+    <div class="setting">
+      <div class="setting-label">إبقاء الشاشة مضاءة</div>
+      <label class="switch"><input type="checkbox" id="awake"><span></span></label>
+    </div>
+    <div class="about">
+      <p>مصحف — تطبيق قراءة بسيط وخفيف.</p>
+      <p class="muted">يعمل بدون إنترنت · بدون إعلانات · بدون تتبّع</p>
+      <p class="muted small">نص المصحف برواية حفص عن عاصم بالرسم العثماني.<br>الخط: Amiri Quran (رخصة SIL OFL).</p>
+      <p class="muted small" id="ver"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== نافذة الانتقال لصفحة ===== -->
+<div id="goto" class="modal">
+  <div class="modal-card">
+    <div class="modal-title">الانتقال إلى صفحة</div>
+    <input id="goto-input" type="number" min="1" max="604" inputmode="numeric" placeholder="١ – ٦٠٤">
+    <div class="modal-actions">
+      <button class="btn ghost" data-close>إلغاء</button>
+      <button class="btn" id="goto-ok">انتقال</button>
+    </div>
+  </div>
+</div>
+
+<div id="splash"><div class="spinner"></div><div class="splash-text">جارٍ التحميل…</div></div>
+
+<script src="app.js"></script>
+</body>
+</html>

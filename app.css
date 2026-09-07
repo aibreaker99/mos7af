@@ -134,12 +134,12 @@ body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
   font-family: 'AmiriQuran', serif;
   font-size: var(--fs);
   line-height: 2.05;
-  text-align: justify;
-  text-align-last: center;
+  text-align: right;          /* التبرير يتولّاه justifyPage() في app.js */
   word-spacing: .04em;
   margin: 0;
 }
 .ayah { cursor: pointer; border-radius: 6px; }
+.w { display: inline; }
 .ayah.hl { background: var(--accent-soft); box-shadow: 0 0 0 4px var(--accent-soft); }
 .ayah-num { color: var(--accent); font-size: .92em; }
 

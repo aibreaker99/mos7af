@@ -64,7 +64,80 @@ function normalize(text) {
 }
 
 // ==================================================================
-// 3) رسم صفحة المصحف
+// 3) التبرير الذكي (منع الفجوات الكبيرة بين الكلمات)
+// ==================================================================
+// المشكلة: text-align: justify يجبر كل سطر على ملء العرض، فإذا كان السطر
+// فيه كلمات قليلة تتحول المسافات إلى فجوات ضخمة.
+// الحل: نقيس كل سطر بأنفسنا. إذا كان الفراغ الموزّع صغيراً نبرّر السطر
+// (حواف مستقيمة كالمصحف)، وإذا كان كبيراً نوسّط السطر بدل تمديده.
+
+const MAX_EXTRA = 0.42;   // أقصى فراغ إضافي بين كلمتين (بنسبة حجم الخط)
+
+function justifyPage() {
+  const box = $('#page');
+  if (!box) return;
+  const paras = $$('#page .ayat');
+
+  // (أ) تصفير أي هوامش من رسم سابق — كل عمليات الكتابة أولاً
+  paras.forEach(p => p.querySelectorAll('.w')
+    .forEach(w => { w.style.marginRight = ''; w.style.marginLeft = ''; }));
+
+  paras.forEach(p => {
+    const ws = Array.from(p.querySelectorAll('.w'));
+    if (ws.length < 2) return;
+
+    const pw  = p.clientWidth;
+    const fsz = parseFloat(getComputedStyle(p).fontSize) || 16;
+    const cap = fsz * MAX_EXTRA;
+
+    // (ب) القراءة: كل المستطيلات دفعة واحدة (أسرع للمتصفح)
+    const rects = ws.map(w => w.getBoundingClientRect());
+
+    // (ج) تقسيم الكلمات إلى أسطر
+    // معياران: نزول واضح لأسفل، أو قفزة إلى يمين الصفحة (بداية سطر جديد)
+    const lh = parseFloat(getComputedStyle(p).lineHeight) || fsz * 2;
+    const lines = [];
+    let cur = [0];
+    for (let i = 1; i < ws.length; i++) {
+      const down = rects[i].top - rects[i - 1].top > lh * 0.5;
+      const jump = rects[i].right > rects[i - 1].right + 1;
+      if (down || jump) { lines.push(cur); cur = [i]; }
+      else cur.push(i);
+    }
+    lines.push(cur);
+
+    // (د) حساب الهوامش لكل سطر ثم تطبيقها دفعة واحدة
+    const ops = [];
+    lines.forEach((line, li) => {
+      const first = rects[line[0]];
+      const last  = rects[line[line.length - 1]];
+      const used  = first.right - last.left;        // من اليمين لليسار
+      let free    = pw - used - 1;                  // 1px أمان حتى لا ينكسر السطر
+      if (free <= 0.5) return;
+
+      // الفجوات القابلة للتوسيع: كل زوج متتالٍ، عدا ما قبل رقم الآية
+      const flex = line.slice(0, -1)
+        .filter(i => !ws[i + 1].classList.contains('ayah-num'));
+      const gaps   = flex.length;
+      const isLast = li === lines.length - 1;       // آخر سطر: يُوسَّط دائماً
+
+      if (!isLast && gaps > 0) {
+        const extra = free / gaps;
+        if (extra <= cap) {                          // تمديد مقبول → تبرير كامل
+          flex.forEach(i => ops.push([ws[i], 'marginLeft', extra]));
+          return;
+        }
+        flex.forEach(i => ops.push([ws[i], 'marginLeft', cap]));
+        free -= cap * gaps;                          // الباقي يذهب للتوسيط
+      }
+      ops.push([ws[line[0]], 'marginRight', free / 2]);
+    });
+    ops.forEach(([el, prop, val]) => { el.style[prop] = val.toFixed(2) + 'px'; });
+  });
+}
+
+// ==================================================================
+// 4) رسم صفحة المصحف
 // ==================================================================
 function renderPage(pageNo) {
   pageNo = Math.min(604, Math.max(1, pageNo));
@@ -98,9 +171,12 @@ function renderPage(pageNo) {
     }
 
     if (!open) { parts.push('<p class="ayat">'); open = true; }
+    // كل كلمة داخل <span class="w"> حتى يستطيع التبرير الذكي قياس الأسطر
+    const words = text.trim().split(/\s+/)
+      .map(w => '<span class="w">' + w + '</span>').join(' ');
     parts.push(
-      '<span class="ayah" data-i="' + i + '">' + text +
-      '<span class="ayah-num">' + ayahMark(aNo) + '</span></span> '
+      '<span class="ayah" data-i="' + i + '">' + words +
+      '\u00A0<span class="w ayah-num">' + ayahMark(aNo) + '</span></span> '
     );
   }
   if (open) parts.push('</p>');
@@ -115,6 +191,7 @@ function renderPage(pageNo) {
   );
 
   box.innerHTML = parts.join('');
+  justifyPage();
   $('#page-wrap').scrollTop = 0;
 
   // تحديث الشريط العلوي والسفلي
@@ -231,6 +308,7 @@ function applyTheme(name) {
 
 function applyFontSize(px) {
   document.documentElement.style.setProperty('--fs', px + 'px');
+  requestAnimationFrame(justifyPage);   // إعادة توزيع الأسطر بعد تغيير الحجم
   $('#fs').value = px;
   $('#fs-val').textContent = arNum(px);
   store.set('fontSize', px);
@@ -336,6 +414,14 @@ function wireEvents() {
     if (e.target.closest('.ayah') || e.target.closest('.row')) return;
     document.body.classList.toggle('immersive');
   });
+
+  // إعادة توزيع الأسطر عند تدوير الجهاز أو تغيير حجم النافذة
+  let rsz;
+  window.addEventListener('resize', () => {
+    clearTimeout(rsz); rsz = setTimeout(justifyPage, 120);
+  });
+  // الخط يُحمَّل متأخراً أحياناً، فنعيد القياس بعد جاهزيته
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(justifyPage);
 
   // إعادة طلب إبقاء الشاشة مضاءة عند العودة للتطبيق
   document.addEventListener('visibilitychange', () => {

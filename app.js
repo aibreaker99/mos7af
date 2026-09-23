@@ -8,7 +8,7 @@
      verses : [[سورة, آية, صفحة, جزء, "النص", سجدة]] 6236 آية
    ================================================================== */
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.1';
 
 // ------- اختصارات قصيرة -------
 const $ = (sel) => document.querySelector(sel);
@@ -45,9 +45,9 @@ function arNum(n) {
   return String(n).split('').map(d => AR_DIGITS[+d] ?? d).join('');
 }
 
-// علامة نهاية الآية: ۝ متبوعة برقم الآية
+// علامة نهاية الآية: خط مجمع الملك فهد يرسم الرقم داخل الزخرفة تلقائياً
 function ayahMark(n) {
-  return '۝' + arNum(n);
+  return arNum(n);
 }
 
 // تجريد النص من التشكيل والعلامات ليعمل البحث بدون حركات
@@ -155,17 +155,20 @@ function renderPage(pageNo) {
 
     // إذا بدأت سورة جديدة داخل الصفحة، نضع عنوانها والبسملة
     if (sNo !== lastSurah) {
-      if (open) { parts.push('</p>'); open = false; }
-      const s = DB.surahs[sNo - 1];
-      parts.push(
-        '<div class="surah-head" id="sh-' + sNo + '">' +
-          '<span class="nm">سُورَةُ ' + s.name + '</span>' +
-          '<span class="meta"><bdi>' + arNum(s.c) + ' آية</bdi> · <bdi>' + s.type + '</bdi></span>' +
-        '</div>'
-      );
-      // البسملة تُعرض لكل السور ما عدا الفاتحة (البسملة آية فيها) والتوبة
-      if (sNo !== 1 && sNo !== 9 && aNo === 1) {
-        parts.push('<div class="basmala">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>');
+      // عنوان السورة يظهر فقط حيث تبدأ السورة فعلاً (أول آية)، كما في المصحف المطبوع
+      if (aNo === 1) {
+        if (open) { parts.push('</p>'); open = false; }
+        const s = DB.surahs[sNo - 1];
+        parts.push(
+          '<div class="surah-head" id="sh-' + sNo + '">' +
+            '<span class="nm">سُورَةُ ' + s.name + '</span>' +
+            '<span class="meta"><bdi>' + arNum(s.c) + ' آية</bdi> · <bdi>' + s.type + '</bdi></span>' +
+          '</div>'
+        );
+        // البسملة تُعرض لكل السور ما عدا الفاتحة (البسملة آية فيها) والتوبة
+        if (sNo !== 1 && sNo !== 9) {
+          parts.push('<div class="basmala">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>');
+        }
       }
       lastSurah = sNo;
     }
@@ -183,11 +186,7 @@ function renderPage(pageNo) {
 
   const juzNo = DB.verses[from][3];
   parts.push(
-    '<div class="page-footer">' +
-      '<bdi>' + DB.surahs[DB.verses[from][0] - 1].name + '</bdi>' +
-      '<bdi>صفحة ' + arNum(pageNo) + '</bdi>' +
-      '<bdi>الجزء ' + arNum(juzNo) + '</bdi>' +
-    '</div>'
+    '<div class="page-footer"><span class="pf-num">' + arNum(pageNo) + '</span></div>'
   );
 
   box.innerHTML = parts.join('');
@@ -197,6 +196,8 @@ function renderPage(pageNo) {
   // تحديث الشريط العلوي والسفلي
   $('#t-surah').textContent = DB.surahs[DB.verses[from][0] - 1].name;
   $('#t-juz').textContent = 'الجزء ' + arNum(juzNo);
+  $('#pi-surah').textContent = $('#t-surah').textContent;
+  $('#pi-juz').textContent = $('#t-juz').textContent;
   $('#t-page').textContent = arNum(pageNo);
   document.title = 'مصحف · ' + $('#t-surah').textContent;
 
@@ -409,9 +410,12 @@ function wireEvents() {
     x0 = null;
   }, { passive: true });
 
+  // الوضع الافتراضي: صفحة صافية بدون أشرطة (النقر يظهرها)
+  document.body.classList.add('immersive');
+
   // النقر على فراغ الصفحة يخفي/يظهر الأشرطة
   wrap.addEventListener('click', (e) => {
-    if (e.target.closest('.ayah') || e.target.closest('.row')) return;
+    if (e.target.closest('button, a, .row')) return;
     document.body.classList.toggle('immersive');
   });
 

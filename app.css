@@ -4,9 +4,10 @@
    ================================================ */
 
 @font-face {
-  font-family: 'AmiriQuran';
-  src: url('fonts/AmiriQuran-Regular.woff') format('woff'),
-       url('fonts/AmiriQuran-Regular.ttf') format('truetype');
+  font-family: 'UthmanicHafs';
+  src: url('fonts/UthmanicHafs.woff2') format('woff2'),
+       url('fonts/UthmanicHafs.woff') format('woff'),
+       url('fonts/UthmanicHafs.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -111,9 +112,21 @@ button, input { font-family: inherit; color: inherit; }
 }
 .page-chip:active { background: var(--accent-soft); }
 
+/* شريطا القراءة يطفوان فوق الصفحة (الافتراضي: مخفيان والصفحة صافية) */
+#reader .topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+#reader .bottombar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; }
+
+/* سطر معلومات صغير دائم: الجزء يمين واسم السورة يسار */
+.page-info {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: calc(10px + var(--safe-t)) 22px 2px;
+  font-size: 13px; color: var(--muted);
+  flex: 0 0 auto;
+}
+
 /* وضع القراءة الغامرة: إخفاء الأشرطة */
-body.immersive .topbar { transform: translateY(-100%); opacity: 0; }
-body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
+body.immersive .topbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+body.immersive .bottombar { transform: translateY(100%); opacity: 0; pointer-events: none; }
 
 /* ---------- صفحة المصحف ---------- */
 #page-wrap {
@@ -131,7 +144,7 @@ body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
   min-height: 100%;
 }
 .ayat {
-  font-family: 'AmiriQuran', serif;
+  font-family: 'UthmanicHafs', serif;
   font-size: var(--fs);
   line-height: 2.05;
   text-align: right;          /* التبرير يتولّاه justifyPage() في app.js */
@@ -151,17 +164,18 @@ body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
   background: var(--accent-soft);
 }
 .surah-head:first-child { margin-top: 0; }
-.surah-head .nm { font-family: 'AmiriQuran', serif; font-size: calc(var(--fs) * .8); color: var(--accent); }
+.surah-head .nm { font-family: 'UthmanicHafs', serif; font-size: calc(var(--fs) * .8); color: var(--accent); }
 .surah-head .meta { font-size: 12px; color: var(--muted); white-space: nowrap; }
 .basmala {
-  font-family: 'AmiriQuran', serif;
+  font-family: 'UthmanicHafs', serif;
   font-size: calc(var(--fs) * .86);
   text-align: center; margin: 4px 0 12px; color: var(--ink);
 }
 .page-footer {
   margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line);
-  display: flex; justify-content: space-between; font-size: 12px; color: var(--muted);
+  display: flex; justify-content: center; font-size: 12px; color: var(--muted);
 }
+.pf-num { font-family: 'UthmanicHafs', serif; font-size: 22px; line-height: 1; color: var(--muted); }
 
 /* ---------- القوائم ---------- */
 .tabs { display: flex; gap: 6px; padding: 10px 12px; background: var(--bar); border-bottom: 1px solid var(--line); }
@@ -188,11 +202,11 @@ body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
   font-size: 13px; font-weight: 700;
 }
 .row .body { flex: 1; min-width: 0; }
-.row .t1 { display: block; font-family: 'AmiriQuran', serif; font-size: 21px; line-height: 1.7; }
+.row .t1 { display: block; font-family: 'UthmanicHafs', serif; font-size: 21px; line-height: 1.7; }
 .row .t2 { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
 .row .side { font-size: 12px; color: var(--muted); flex: 0 0 auto; }
 
-.res-ayah { display: block; font-family: 'AmiriQuran', serif; font-size: 22px; line-height: 2.1; }
+.res-ayah { display: block; font-family: 'UthmanicHafs', serif; font-size: 22px; line-height: 2.1; }
 .res-ayah mark { background: none; color: var(--accent); font-weight: 700; }
 .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; }
 
@@ -218,7 +232,7 @@ body.immersive .bottombar { transform: translateY(100%); opacity: 0; }
 .segmented button.on { background: var(--paper); color: var(--accent); font-weight: 700; box-shadow: var(--shadow); }
 
 input[type=range] { width: 100%; accent-color: var(--accent); }
-.preview { font-family: 'AmiriQuran', serif; font-size: var(--fs); text-align: center; margin-top: 14px; line-height: 2; }
+.preview { font-family: 'UthmanicHafs', serif; font-size: var(--fs); text-align: center; margin-top: 14px; line-height: 2; }
 
 .switch { position: relative; display: inline-block; width: 48px; height: 28px; }
 .switch input { opacity: 0; width: 0; height: 0; }

@@ -3,7 +3,7 @@
    عند تعديل أي ملف: غيّر رقم CACHE ليأخذ المستخدم النسخة الجديدة
    ================================================================== */
 
-const CACHE = 'mushaf-v2';
+const CACHE = 'mushaf-v4';
 
 const ASSETS = [
   './',
@@ -12,8 +12,9 @@ const ASSETS = [
   './app.js',
   './manifest.webmanifest',
   './data/quran.json',
-  './fonts/AmiriQuran-Regular.woff',
-  './fonts/AmiriQuran-Regular.ttf',
+  './fonts/UthmanicHafs.woff2',
+  './fonts/UthmanicHafs.woff',
+  './fonts/UthmanicHafs.ttf',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
